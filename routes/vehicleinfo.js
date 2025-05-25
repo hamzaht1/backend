@@ -8,6 +8,166 @@ const Diagnostic = require('../models/Diagnostic');
 const auth = require('../middleware/auth');
 const User = require('../models/User');
 
+/**
+ * @swagger
+ * tags:
+ *   name: Driver Vehicle Info
+ *   description: Driver's vehicle information and management
+ */
+
+/**
+ * @swagger
+ * /api/driver/vehicle-info:
+ *   get:
+ *     summary: Get current driver's vehicle information
+ *     tags: [Driver Vehicle Info]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Vehicle information retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 vehicle:
+ *                   $ref: '#/components/schemas/Vehicle'
+ *                 diagnostics:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Diagnostic'
+ *                 currentDelivery:
+ *                   $ref: '#/components/schemas/Delivery'
+ *       404:
+ *         description: No vehicle assigned to driver
+ */
+
+/**
+ * @swagger
+ * /api/driver/status:
+ *   put:
+ *     summary: Update driver status
+ *     tags: [Driver Vehicle Info]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [active, inactive, break, maintenance]
+ *     responses:
+ *       200:
+ *         description: Status updated successfully
+ *       400:
+ *         description: Invalid status
+ */
+
+/**
+ * @swagger
+ * tags:
+ *   name: Driver Dashboard
+ *   description: Driver-specific vehicle information and dashboard
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     VehicleInfo:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         vehicleId:
+ *           type: string
+ *         status:
+ *           type: string
+ *           enum: [active, maintenance, inactive]
+ *         currentLocation:
+ *           type: object
+ *           properties:
+ *             lat:
+ *               type: number
+ *             lng:
+ *               type: number
+ *         diagnostics:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               code:
+ *                 type: string
+ *               severity:
+ *                 type: string
+ *               timestamp:
+ *                 type: string
+ *                 format: date-time
+ */
+
+/**
+ * @swagger
+ * /api/driver/vehicle-info:
+ *   get:
+ *     summary: Get vehicle information for logged-in driver
+ *     tags: [Driver Dashboard]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Vehicle information retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/VehicleInfo'
+ *       401:
+ *         description: Unauthorized or no vehicle assigned
+ */
+
+/**
+ * @swagger
+ * /api/driver/deliveries:
+ *   get:
+ *     summary: Get driver's delivery history
+ *     tags: [Driver Dashboard]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [pending, in-progress, completed]
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *     responses:
+ *       200:
+ *         description: Driver's deliveries retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Delivery'
+ *       401:
+ *         description: Unauthorized
+ */
+
 // GET /api/driver/vehicle-info - Get vehicle information for driver dashboard
 router.get('/vehicle-info', auth, async (req, res) => {
   try {

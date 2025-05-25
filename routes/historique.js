@@ -6,6 +6,129 @@ const auth = require('../middleware/auth');
 const Trip = require('../models/trip');
 //const LivePosition = require('../models/LivePosition');
 
+/**
+ * @swagger
+ * tags:
+ *   name: Trip History
+ *   description: Historical trip and route analysis
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     TripHistory:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         vehicleId:
+ *           type: string
+ *         driverId:
+ *           type: string
+ *         startTime:
+ *           type: string
+ *           format: date-time
+ *         endTime:
+ *           type: string
+ *           format: date-time
+ *         route:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               lat:
+ *                 type: number
+ *               lng:
+ *                 type: number
+ *               timestamp:
+ *                 type: string
+ *                 format: date-time
+ *         distance:
+ *           type: number
+ *         duration:
+ *           type: number
+ */
+
+/**
+ * @swagger
+ * /api/historique:
+ *   get:
+ *     summary: Get trip history
+ *     tags: [Trip History]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: vehicleId
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: driverId
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *     responses:
+ *       200:
+ *         description: List of historical trips
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/TripHistory'
+ */
+
+/**
+ * @swagger
+ * /api/historique/analytics:
+ *   get:
+ *     summary: Get trip analytics
+ *     tags: [Trip History]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: period
+ *         schema:
+ *           type: string
+ *           enum: [day, week, month, year]
+ *     responses:
+ *       200:
+ *         description: Trip analytics data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalTrips:
+ *                   type: number
+ *                 totalDistance:
+ *                   type: number
+ *                 averageDuration:
+ *                   type: number
+ *                 byDriver:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       driverId:
+ *                         type: string
+ *                       trips:
+ *                         type: number
+ *                       distance:
+ *                         type: number
+ */
+
 // GET /api/historique - Récupérer tous les trajets du véhicule associé à l'utilisateur
 router.get('/', auth, async (req, res) => {
   try {

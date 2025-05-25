@@ -40,6 +40,96 @@ const LivePositionSchema = new mongoose.Schema({
 
 const LivePosition = mongoose.model('LivePosition2', LivePositionSchema, 'live_position');
 
+/**
+ * @swagger
+ * tags:
+ *   name: Live Position
+ *   description: Real-time vehicle position tracking
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     LivePosition:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         vehicleId:
+ *           type: string
+ *           description: ID of the vehicle
+ *         uid:
+ *           type: string
+ *           description: Vehicle unique identifier
+ *         license_plate:
+ *           type: string
+ *           description: Vehicle license plate
+ *         location:
+ *           type: object
+ *           properties:
+ *             lat:
+ *               type: number
+ *               description: Latitude
+ *             lng:
+ *               type: number
+ *               description: Longitude
+ *         timestamp:
+ *           type: string
+ *           format: date-time
+ *           description: Position timestamp
+ *         speed:
+ *           type: number
+ *           description: Current speed in km/h
+ *         heading:
+ *           type: number
+ *           description: Vehicle heading in degrees
+ */
+
+/**
+ * @swagger
+ * /api/live-position/current:
+ *   get:
+ *     summary: Get current position of all vehicles
+ *     tags: [Live Position]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Current positions retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/LivePosition'
+ */
+
+/**
+ * @swagger
+ * /api/live-position/{vehicleId}:
+ *   get:
+ *     summary: Get current position of a specific vehicle
+ *     tags: [Live Position]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: vehicleId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Vehicle position retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/LivePosition'
+ *       404:
+ *         description: Vehicle not found
+ */
+
 // GET /api/live-position/current - Récupérer la position actuelle du véhicule de l'utilisateur connecté
 router.get('/current', auth, async (req, res) => {
   try {

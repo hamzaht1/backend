@@ -7,6 +7,163 @@ const auth = require('../middleware/auth');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'votre_clé_secrète';
 
+/**
+ * @swagger
+ * tags:
+ *   name: Authentication
+ *   description: User authentication endpoints
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       required:
+ *         - nom
+ *         - prenom
+ *         - email
+ *         - password
+ *         - role
+ *       properties:
+ *         nom:
+ *           type: string
+ *           description: User's last name
+ *         prenom:
+ *           type: string
+ *           description: User's first name
+ *         age:
+ *           type: string
+ *           description: User's age
+ *         adresse:
+ *           type: string
+ *           description: User's address
+ *         email:
+ *           type: string
+ *           format: email
+ *           description: User's email address
+ *         phone:
+ *           type: string
+ *           description: User's phone number
+ *         password:
+ *           type: string
+ *           description: User's password
+ *         role:
+ *           type: string
+ *           enum: [admin, agent, conducteur]
+ *           description: User's role in the system
+ *         status:
+ *           type: string
+ *           enum: [active, inactive, suspended, pending]
+ *           default: active
+ *           description: User's account status
+ *         date:
+ *           type: string
+ *           format: date-time
+ *           description: Account creation date
+ *         name:
+ *           type: string
+ *           description: Full name (automatically generated from nom and prenom)
+ *         uid:
+ *           type: string
+ *           description: Unique identifier for the user
+ */
+
+/**
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - nom
+ *               - prenom
+ *               - email
+ *               - password
+ *               - role
+ *             properties:
+ *               nom:
+ *                 type: string
+ *               prenom:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *               role:
+ *                 type: string
+ *                 enum: [admin, agent, conducteur]
+ *               age:
+ *                 type: string
+ *               adresse:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: User registered successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Invalid input data
+ *       409:
+ *         description: Email already exists
+ */
+
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Authenticate user
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Invalid credentials
+ *       403:
+ *         description: Account inactive or suspended
+ */
+
 // Route de connexion
 router.post('/login', async (req, res) => {
   try {
@@ -67,10 +224,20 @@ router.get('/verify', auth, (req, res) => {
   res.json({ valid: true, user: req.user });
 });
 
-// Route d'enregistrement (si nécessaire)
+// Route d'enregistrement
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, role, status, vehicleId } = req.body;
+    const { 
+      nom, 
+      prenom, 
+      email, 
+      password, 
+      role, 
+      age,
+      adresse,
+      phone,
+      uid 
+    } = req.body;
     
     // Vérification si l'utilisateur existe déjà
     let user = await User.findOne({ email });
@@ -78,15 +245,26 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'L\'utilisateur existe déjà' });
     }
     
+    // Vérification des champs requis
+    if (!nom || !prenom || !email || !password || !role) {
+      return res.status(400).json({ 
+        message: 'Les champs nom, prenom, email, password et role sont obligatoires' 
+      });
+    }
+
     // Création du nouvel utilisateur
     user = new User({
-      name,
+      nom,
+      prenom,
       email,
       password,
-      role: role || 'conducteur', // Par défaut, le rôle est 'conducteur'
-      status: status || 'active',  // Par défaut, le status est 'active'
-      // Ajouter vehicleId uniquement si le rôle est conducteur
-      ...(role === 'conducteur' || !role ? { vehicleId } : {})
+      role,
+      age: age || '',
+      adresse: adresse || '',
+      phone: phone || '',
+      status: 'active',
+      uid: uid || null,
+      // name sera automatiquement généré via le middleware pre-save
     });
     
     // Hashage du mot de passe
@@ -108,22 +286,22 @@ router.post('/register', async (req, res) => {
     
     // Génération du token
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
-    
-    // Préparation de la réponse
+      // Préparation de la réponse
     const response = {
-      token, 
-      role: user.role,
-      status: user.status,
-      name: user.name,
-      userId: user.id
+      token,
+      user: {
+        id: user.id,
+        nom: user.nom,
+        prenom: user.prenom,
+        email: user.email,
+        role: user.role,
+        status: user.status,
+        name: `${user.prenom} ${user.nom}`,
+        uid: user.uid
+      }
     };
     
-    // Ajouter vehicleId à la réponse si le rôle est conducteur
-    if (user.role === 'conducteur' && user.vehicleId) {
-      response.vehicleId = user.vehicleId;
-    }
-    
-    res.json(response);
+    res.status(201).json(response);
   } catch (err) {
     console.error('Erreur serveur:', err.message);
     res.status(500).json({ message: 'Erreur serveur' });

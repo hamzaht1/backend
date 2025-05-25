@@ -20,6 +20,131 @@ const validateRequest = (req, res, next) => {
   next();
 };
 
+/**
+ * @swagger
+ * tags:
+ *   name: Point Restock
+ *   description: Restock point management
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     RestockPoint:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         location:
+ *           type: object
+ *           properties:
+ *             lat:
+ *               type: number
+ *             lng:
+ *               type: number
+ *         capacity:
+ *           type: number
+ *         currentOccupancy:
+ *           type: number
+ *         status:
+ *           type: string
+ *           enum: [active, inactive, maintenance]
+ */
+
+/**
+ * @swagger
+ * /api/point-restock:
+ *   get:
+ *     summary: Get all restock points
+ *     tags: [Point Restock]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [active, inactive, maintenance]
+ *     responses:
+ *       200:
+ *         description: List of restock points
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/RestockPoint'
+ *
+ *   post:
+ *     summary: Create a new restock point
+ *     tags: [Point Restock]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - location
+ *               - capacity
+ *             properties:
+ *               name:
+ *                 type: string
+ *               location:
+ *                 type: object
+ *                 properties:
+ *                   lat:
+ *                     type: number
+ *                   lng:
+ *                     type: number
+ *               capacity:
+ *                 type: number
+ *     responses:
+ *       201:
+ *         description: Restock point created successfully
+ *       400:
+ *         description: Invalid input
+ */
+
+/**
+ * @swagger
+ * /api/point-restock/{id}/status:
+ *   put:
+ *     summary: Update restock point status
+ *     tags: [Point Restock]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [active, inactive, maintenance]
+ *     responses:
+ *       200:
+ *         description: Status updated successfully
+ *       404:
+ *         description: Restock point not found
+ */
+
 // 1. GET /api/point-restock/overview - Obtenir une vue d'ensemble des points de restock
 router.get('/overview', async (req, res) => {
   try {

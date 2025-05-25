@@ -4,6 +4,121 @@ const LivePosition = require('../models/LivePosition'); // Utilise votre modèle
 const Vehicle = require('../models/Vehicle'); // Utilise votre modèle existant
 const { body, validationResult, query } = require('express-validator');
 
+/**
+ * @swagger
+ * tags:
+ *   name: Positions
+ *   description: Vehicle position tracking and history
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Position:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         vehicleId:
+ *           type: string
+ *         timestamp:
+ *           type: string
+ *           format: date-time
+ *         coordinates:
+ *           type: object
+ *           properties:
+ *             lat:
+ *               type: number
+ *             lng:
+ *               type: number
+ *         speed:
+ *           type: number
+ *         heading:
+ *           type: number
+ */
+
+/**
+ * @swagger
+ * /api/positions/current:
+ *   get:
+ *     summary: Get current position of all vehicles
+ *     tags: [Positions]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Current positions of all vehicles
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Position'
+ */
+
+/**
+ * @swagger
+ * /api/positions/{vehicleId}/history:
+ *   get:
+ *     summary: Get position history for a specific vehicle
+ *     tags: [Positions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: vehicleId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: startTime
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *       - in: query
+ *         name: endTime
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *     responses:
+ *       200:
+ *         description: Position history retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Position'
+ *       404:
+ *         description: Vehicle not found
+ */
+
+/**
+ * @swagger
+ * /api/positions/{vehicleId}/last:
+ *   get:
+ *     summary: Get last known position of a specific vehicle
+ *     tags: [Positions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: vehicleId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Last known position retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Position'
+ *       404:
+ *         description: Vehicle not found
+ */
+
 // GET /api/positions - Get all positions with optional filters
 router.get('/', async (req, res) => {
   try {

@@ -2,9 +2,46 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerUI = require('swagger-ui-express');
 require('dotenv').config();
 
 const app = express();
+
+// Swagger Configuration
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Vehicle Tracking API',
+      version: '1.0.0',
+      description: 'API documentation for Vehicle Tracking System',
+      contact: {
+        name: 'API Support',
+        url: 'http://192.168.56.1:5000'
+      }
+    },
+    servers: [
+      {
+        url: 'http://192.168.56.1:5000',
+        description: 'Development server'
+      }
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT'
+        }
+      }
+    }
+  },
+  apis: ['./routes/*.js']
+};
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 app.use(express.json());
 app.use(cors({

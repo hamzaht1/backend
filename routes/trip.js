@@ -4,6 +4,169 @@ const Delivery = require('../models/Delivery');
 const Vehicle = require('../models/Vehicle');
 const auth = require('../middleware/auth');
 
+/**
+ * @swagger
+ * tags:
+ *   name: Trips
+ *   description: Trip and delivery tracking management
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Trip:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         vehicleId:
+ *           type: string
+ *         driverId:
+ *           type: string
+ *         startTime:
+ *           type: string
+ *           format: date-time
+ *         endTime:
+ *           type: string
+ *           format: date-time
+ *         status:
+ *           type: string
+ *           enum: [ongoing, completed, cancelled]
+ *         route:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               lat:
+ *                 type: number
+ *               lng:
+ *                 type: number
+ *               timestamp:
+ *                 type: string
+ *                 format: date-time
+ */
+
+/**
+ * @swagger
+ * /api/livraison:
+ *   get:
+ *     summary: Get all trips
+ *     tags: [Trips]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [ongoing, completed, cancelled]
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *     responses:
+ *       200:
+ *         description: List of trips
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Trip'
+ *
+ *   post:
+ *     summary: Create a new trip
+ *     tags: [Trips]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - vehicleId
+ *               - driverId
+ *             properties:
+ *               vehicleId:
+ *                 type: string
+ *               driverId:
+ *                 type: string
+ *               startTime:
+ *                 type: string
+ *                 format: date-time
+ *     responses:
+ *       201:
+ *         description: Trip created successfully
+ *       400:
+ *         description: Invalid input
+ */
+
+/**
+ * @swagger
+ * /api/livraison/{id}:
+ *   get:
+ *     summary: Get trip by ID
+ *     tags: [Trips]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Trip details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Trip'
+ *       404:
+ *         description: Trip not found
+ *   
+ *   put:
+ *     summary: Update trip status
+ *     tags: [Trips]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [ongoing, completed, cancelled]
+ *               endTime:
+ *                 type: string
+ *                 format: date-time
+ *     responses:
+ *       200:
+ *         description: Trip updated successfully
+ *       404:
+ *         description: Trip not found
+ */
+
 // Route pour récupérer l'historique des livraisons avec filtres
 // IMPORTANT: Cette route doit être AVANT la route /:id
 router.get('/filter', auth, async (req, res) => {

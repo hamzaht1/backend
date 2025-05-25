@@ -5,6 +5,99 @@ const mongoose = require('mongoose');
 const Diagnostique = require('../models/Diagnostic');
 const Vehicle = require('../models/Vehicle'); // Pour les références aux véhicules
 
+/**
+ * @swagger
+ * tags:
+ *   name: Diagnostics
+ *   description: Vehicle diagnostics management
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Diagnostic:
+ *       type: object
+ *       required:
+ *         - uid
+ *         - license_plate
+ *       properties:
+ *         _id:
+ *           type: string
+ *         uid:
+ *           type: string
+ *           description: Vehicle unique identifier
+ *         license_plate:
+ *           type: string
+ *           description: Vehicle license plate
+ *         dtc_code:
+ *           type: string
+ *           description: Diagnostic trouble code
+ *         diagnostic_timestamp:
+ *           type: string
+ *           format: date-time
+ *           description: When the diagnostic was performed
+ *         description:
+ *           type: string
+ *           description: Description of the diagnostic result
+ *         severity:
+ *           type: string
+ *           enum: [low, medium, high]
+ *           description: Severity level of the diagnostic
+ */
+
+/**
+ * @swagger
+ * /api/diagnostique/stats:
+ *   get:
+ *     summary: Get diagnostic statistics
+ *     tags: [Diagnostics]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Diagnostic statistics retrieved
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 total:
+ *                   type: number
+ *                 withIssues:
+ *                   type: number
+ *                 lastCheck:
+ *                   type: string
+ *                   format: date-time
+ */
+
+/**
+ * @swagger
+ * /api/diagnostique/{vehicleId}:
+ *   get:
+ *     summary: Get diagnostics for a specific vehicle
+ *     tags: [Diagnostics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: vehicleId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Vehicle diagnostics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Diagnostic'
+ *       404:
+ *         description: Vehicle not found
+ */
+
 // GET /api/diagnostique/stats - Obtenir les statistiques des diagnostics
 router.get('/stats', async (req, res) => {
   try {

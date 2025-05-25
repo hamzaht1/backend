@@ -423,4 +423,146 @@ router.get('/test', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * tags:
+ *   name: Personnel
+ *   description: Personnel and driver management
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Driver:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         email:
+ *           type: string
+ *           format: email
+ *         phone:
+ *           type: string
+ *         license:
+ *           type: string
+ *         status:
+ *           type: string
+ *           enum: [active, inactive, on-delivery]
+ *         vehicleId:
+ *           type: string
+ *         created_at:
+ *           type: string
+ *           format: date-time
+ */
+
+/**
+ * @swagger
+ * /api/personnel/drivers:
+ *   get:
+ *     summary: Get all drivers
+ *     tags: [Personnel]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [active, inactive, on-delivery]
+ *     responses:
+ *       200:
+ *         description: List of drivers
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Driver'
+ *
+ *   post:
+ *     summary: Add a new driver
+ *     tags: [Personnel]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - phone
+ *               - license
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               phone:
+ *                 type: string
+ *               license:
+ *                 type: string
+ *               vehicleId:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Driver created successfully
+ *       400:
+ *         description: Invalid input
+ */
+
+/**
+ * @swagger
+ * /api/personnel/drivers/{id}:
+ *   get:
+ *     summary: Get driver by ID
+ *     tags: [Personnel]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Driver details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Driver'
+ *       404:
+ *         description: Driver not found
+ *
+ *   put:
+ *     summary: Update driver
+ *     tags: [Personnel]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Driver'
+ *     responses:
+ *       200:
+ *         description: Driver updated successfully
+ *       404:
+ *         description: Driver not found
+ */
+
 module.exports = router;

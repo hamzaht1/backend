@@ -10,6 +10,193 @@ const client = mongoose.model('client', {}, 'client');
 const drivers = mongoose.model('drivers', {}, 'drivers');
 const vehicle = mongoose.model('vehicle', {}, 'vehicle');
 
+/**
+ * @swagger
+ * tags:
+ *   name: Delivery
+ *   description: Delivery management endpoints
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Delivery:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         id_camion:
+ *           type: string
+ *         id_driver:
+ *           type: string
+ *         status:
+ *           type: string
+ *           enum: [pending, in-progress, completed, cancelled]
+ *         start_location:
+ *           type: object
+ *           properties:
+ *             lat:
+ *               type: number
+ *             lng:
+ *               type: number
+ *         end_location:
+ *           type: object
+ *           properties:
+ *             lat:
+ *               type: number
+ *             lng:
+ *               type: number
+ *         created_at:
+ *           type: string
+ *           format: date-time
+ *         updated_at:
+ *           type: string
+ *           format: date-time
+ */
+
+/**
+ * @swagger
+ * /api/delivery:
+ *   get:
+ *     summary: Get all deliveries
+ *     tags: [Delivery]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [pending, in-progress, completed, cancelled]
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *     responses:
+ *       200:
+ *         description: List of deliveries
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 deliveries:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Delivery'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     currentPage:
+ *                       type: integer
+ *                     totalPages:
+ *                       type: integer
+ *                     totalItems:
+ *                       type: integer
+ *
+ *   post:
+ *     summary: Create a new delivery
+ *     tags: [Delivery]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - id_camion
+ *               - id_driver
+ *               - start_location
+ *               - end_location
+ *             properties:
+ *               id_camion:
+ *                 type: string
+ *               id_driver:
+ *                 type: string
+ *               start_location:
+ *                 type: object
+ *                 properties:
+ *                   lat:
+ *                     type: number
+ *                   lng:
+ *                     type: number
+ *               end_location:
+ *                 type: object
+ *                 properties:
+ *                   lat:
+ *                     type: number
+ *                   lng:
+ *                     type: number
+ *     responses:
+ *       201:
+ *         description: Delivery created successfully
+ *       400:
+ *         description: Invalid input
+ */
+
+/**
+ * @swagger
+ * /api/delivery/{id}:
+ *   get:
+ *     summary: Get delivery by ID
+ *     tags: [Delivery]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Delivery details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Delivery'
+ *       404:
+ *         description: Delivery not found
+ *
+ *   put:
+ *     summary: Update delivery status
+ *     tags: [Delivery]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [pending, in-progress, completed, cancelled]
+ *     responses:
+ *       200:
+ *         description: Delivery updated successfully
+ *       404:
+ *         description: Delivery not found
+ */
+
 // GET /api/delivery/statistics - Statistiques des livraisons
 router.get('/statistics', async (req, res) => {
   try {

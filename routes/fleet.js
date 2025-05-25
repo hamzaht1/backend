@@ -7,6 +7,442 @@ const VehicleStatistics = require('../models/VehicleKm');
 const Delivery = require('../models/Delivery');
 const Diagnostic = require('../models/Diagnostic');
 
+/**
+ * @swagger
+ * tags:
+ *   name: Fleet
+ *   description: Fleet management and vehicle operations
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Vehicle:
+ *       type: object
+ *       required:
+ *         - uid
+ *         - license_plate
+ *         - rfid_tag
+ *       properties:
+ *         _id:
+ *           type: string
+ *         uid:
+ *           type: string
+ *           description: Unique identifier for the vehicle
+ *         license_plate:
+ *           type: string
+ *           description: Vehicle's license plate number
+ *         rfid_tag:
+ *           type: string
+ *           description: RFID tag identifier
+ *         status:
+ *           type: string
+ *           enum: [active, inactive, maintenance]
+ *           description: Current status of the vehicle
+ *         driver:
+ *           type: string
+ *           description: ID of the assigned driver
+ *         model:
+ *           type: string
+ *           description: Vehicle model
+ *     VehicleStatistics:
+ *       type: object
+ *       properties:
+ *         uid:
+ *           type: string
+ *         total_km:
+ *           type: number
+ *         monthly_data:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               month:
+ *                 type: string
+ *               km:
+ *                 type: number
+ *               deliveries:
+ *                 type: number
+ */
+
+/**
+ * @swagger
+ * /api/fleet/overview:
+ *   get:
+ *     summary: Get fleet overview statistics
+ *     tags: [Fleet]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Fleet overview statistics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalVehicles:
+ *                   type: object
+ *                   properties:
+ *                     count:
+ *                       type: number
+ *                     change:
+ *                       type: object
+ *                       properties:
+ *                         trend:
+ *                           type: string
+ *                           enum: [up, down]
+ *                         value:
+ *                           type: string
+ *                         label:
+ *                           type: string
+ *                 trackedVehicles:
+ *                   type: object
+ *                   properties:
+ *                     count:
+ *                       type: number
+ *                     change:
+ *                       type: object
+ *                       properties:
+ *                         trend:
+ *                           type: string
+ *                         value:
+ *                           type: string
+ *                         label:
+ *                           type: string
+ *                 connectedVehicles:
+ *                   type: object
+ *                   properties:
+ *                     count:
+ *                       type: number
+ *                     change:
+ *                       type: object
+ *                       properties:
+ *                         trend:
+ *                           type: string
+ *                         value:
+ *                           type: string
+ *                         label:
+ *                           type: string
+ */
+
+/**
+ * @swagger
+ * /api/fleet/vehicles:
+ *   get:
+ *     summary: Get vehicles with pagination and filtering
+ *     tags: [Fleet]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 6
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [all, active, inactive, maintenance]
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of vehicles
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 vehicles:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Vehicle'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     currentPage:
+ *                       type: integer
+ *                     totalPages:
+ *                       type: integer
+ *                     totalVehicles:
+ *                       type: integer
+ *                     vehiclesPerPage:
+ *                       type: integer
+ */
+
+/**
+ * @swagger
+ * /api/fleet/vehicles/{id}:
+ *   get:
+ *     summary: Get vehicle details by ID
+ *     tags: [Fleet]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Vehicle details retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Vehicle'
+ *       404:
+ *         description: Vehicle not found
+ */
+
+/**
+ * @swagger
+ * /api/fleet/vehicles:
+ *   post:
+ *     summary: Create a new vehicle
+ *     tags: [Fleet]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - uid
+ *               - license_plate
+ *               - rfid_tag
+ *             properties:
+ *               uid:
+ *                 type: string
+ *               license_plate:
+ *                 type: string
+ *               rfid_tag:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *                 enum: [active, inactive, maintenance]
+ *               driver:
+ *                 type: string
+ *               model:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Vehicle created successfully
+ *       400:
+ *         description: Invalid input
+ *       409:
+ *         description: Vehicle already exists
+ */
+
+/**
+ * @swagger
+ * /api/fleet/vehicles/{id}:
+ *   put:
+ *     summary: Update a vehicle
+ *     tags: [Fleet]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               uid:
+ *                 type: string
+ *               license_plate:
+ *                 type: string
+ *               rfid_tag:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *                 enum: [active, inactive, maintenance]
+ *               driver:
+ *                 type: string
+ *               model:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Vehicle updated successfully
+ *       400:
+ *         description: Invalid input
+ *       404:
+ *         description: Vehicle not found
+ */
+
+/**
+ * @swagger
+ * /api/fleet/vehicles/{id}/status:
+ *   put:
+ *     summary: Update vehicle status
+ *     tags: [Fleet]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [active, inactive, maintenance]
+ *     responses:
+ *       200:
+ *         description: Vehicle status updated
+ *       404:
+ *         description: Vehicle not found
+ */
+
+/**
+ * @swagger
+ * /api/fleet/vehicles/{id}:
+ *   delete:
+ *     summary: Delete a vehicle
+ *     tags: [Fleet]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Vehicle deleted successfully
+ *       404:
+ *         description: Vehicle not found
+ */
+
+/**
+ * @swagger
+ * /api/fleet/vehicles/{id}/diagnostics:
+ *   get:
+ *     summary: Get diagnostics for a specific vehicle
+ *     tags: [Fleet]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Vehicle diagnostics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 vehicle:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                     uid:
+ *                       type: string
+ *                     license_plate:
+ *                       type: string
+ *                 diagnostics:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       dtc_code:
+ *                         type: string
+ *                       diagnostic_timestamp:
+ *                         type: string
+ *                         format: date-time
+ *       404:
+ *         description: Vehicle not found
+ */
+
+/**
+ * @swagger
+ * /api/fleet/diagnostics:
+ *   get:
+ *     summary: Get all diagnostics (pour débogage)
+ *     tags: [Fleet]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of diagnostics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 total:
+ *                   type: integer
+ *                 vehicles:
+ *                   type: integer
+ *                 data:
+ *                   type: object
+ *                   additionalProperties:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         dtc_code:
+ *                           type: string
+ *                         diagnostic_timestamp:
+ *                           type: string
+ *                           format: date-time
+ */
+
+/**
+ * @swagger
+ * /api/fleet:
+ *   get:
+ *     summary: Get all vehicles in fleet
+ *     tags: [Fleet]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of vehicles in fleet
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Vehicle'
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
+
 // GET /api/fleet/overview - Get fleet overview statistics
 router.get('/overview', async (req, res) => {
   try {

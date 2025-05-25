@@ -4,6 +4,90 @@ const router = express.Router();
 const VehicleKm = require('../models/VehicleKm');
 const Vehicle = require('../models/Vehicle');
 
+/**
+ * @swagger
+ * tags:
+ *   name: Traffic
+ *   description: Traffic monitoring and analysis
+ */
+
+/**
+ * @swagger
+ * /api/traffic/current:
+ *   get:
+ *     summary: Get current traffic status
+ *     tags: [Traffic]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Current traffic information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 activeVehicles:
+ *                   type: number
+ *                 congestionLevel:
+ *                   type: string
+ *                   enum: [low, medium, high]
+ *                 averageSpeed:
+ *                   type: number
+ *                 hotspots:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       location:
+ *                         type: object
+ *                         properties:
+ *                           lat:
+ *                             type: number
+ *                           lng:
+ *                             type: number
+ *                       congestionLevel:
+ *                         type: string
+ */
+
+/**
+ * @swagger
+ * /api/traffic/history:
+ *   get:
+ *     summary: Get traffic history
+ *     tags: [Traffic]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *     responses:
+ *       200:
+ *         description: Historical traffic data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   timestamp:
+ *                     type: string
+ *                     format: date-time
+ *                   congestionLevel:
+ *                     type: string
+ *                   activeVehicles:
+ *                     type: number
+ */
+
 // GET /api/traffic/current - Get current traffic data
 router.get('/current', async (req, res) => {
   try {

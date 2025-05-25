@@ -4,6 +4,298 @@ const router = express.Router();
 const ParkingLot = require('../models/ParkingLot');
 const ParkingSpace = require('../models/ParkingSpace');
 
+/**
+ * @swagger
+ * tags:
+ *   name: Parking
+ *   description: Parking lot and space management
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     ParkingLot:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         capacity:
+ *           type: number
+ *         location:
+ *           type: object
+ *           properties:
+ *             lat:
+ *               type: number
+ *             lng:
+ *               type: number
+ *     ParkingSpace:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         lotId:
+ *           type: string
+ *         spaceNumber:
+ *           type: string
+ *         status:
+ *           type: string
+ *           enum: [available, occupied, reserved, maintenance]
+ *         vehicleId:
+ *           type: string
+ */
+
+/**
+ * @swagger
+ * /api/parking/lots:
+ *   get:
+ *     summary: Get all parking lots
+ *     tags: [Parking]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of parking lots
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ParkingLot'
+ */
+
+/**
+ * @swagger
+ * /api/parking/spaces/{lotId}:
+ *   get:
+ *     summary: Get parking spaces for a specific lot
+ *     tags: [Parking]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: lotId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of parking spaces
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ParkingSpace'
+ *       404:
+ *         description: Parking lot not found
+ */
+
+/**
+ * @swagger
+ * /api/parking/overview:
+ *   get:
+ *     summary: Get parking overview
+ *     tags: [Parking]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Parking overview statistics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statsCards:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       title:
+ *                         type: string
+ *                       value:
+ *                         type: string
+ *                       icon:
+ *                         type: string
+ *                       color:
+ *                         type: string
+ *                       iconColor:
+ *                         type: string
+ *                       meta:
+ *                         type: string
+ *                       showStatus:
+ *                         type: boolean
+ *                       statusType:
+ *                         type: string
+ *                 parkingLots:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/ParkingLot'
+ *                 totalLots:
+ *                   type: integer
+ *                 totalSpaces:
+ *                   type: integer
+ *                 availableSpaces:
+ *                   type: integer
+ *                 occupancyRate:
+ *                   type: number
+ */
+
+/**
+ * @swagger
+ * /api/parking/history:
+ *   get:
+ *     summary: Get parking history for the main chart
+ *     tags: [Parking]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: period
+ *         required: false
+ *         schema:
+ *           type: string
+ *           enum: [day, month, year]
+ *       - in: query
+ *         name: parking_id
+ *         required: false
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Historical data for parking occupancy
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 chartData:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       time:
+ *                         type: string
+ *                       value:
+ *                         type: number
+ *                       occupied:
+ *                         type: integer
+ *                       available:
+ *                         type: integer
+ *                       total:
+ *                         type: integer
+ *                 insights:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       icon:
+ *                         type: string
+ *                       iconColor:
+ *                         type: string
+ *                       iconBg:
+ *                         type: string
+ *                       title:
+ *                         type: string
+ *                       period:
+ *                         type: string
+ *                       value:
+ *                         type: string
+ *                 period:
+ *                   type: string
+ *                 selectedLot:
+ *                   type: string
+ */
+
+/**
+ * @swagger
+ * /api/parking/space/{id}/history:
+ *   get:
+ *     summary: Get history for a specific parking space
+ *     tags: [Parking]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Historical data for the specified parking space
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 space:
+ *                   $ref: '#/components/schemas/ParkingSpace'
+ *                 parking:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                 history:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       date:
+ *                         type: string
+ *                       occupations:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             vehicleId:
+ *                               type: string
+ *                             from:
+ *                               type: string
+ *                             to:
+ *                               type: string
+ *                             duration:
+ *                               type: string
+ */
+
+/**
+ * @swagger
+ * /api/parking/occupancy-trend:
+ *   get:
+ *     summary: Get occupancy trend data for the mini-chart
+ *     tags: [Parking]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: timeRange
+ *         required: false
+ *         schema:
+ *           type: string
+ *           enum: [day, week, month]
+ *     responses:
+ *       200:
+ *         description: Occupancy trend data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   time:
+ *                     type: string
+ *                   value:
+ *                     type: number
+ */
+
 // GET /api/parking/overview - Vue d'ensemble
 router.get('/overview', async (req, res) => {
   try {

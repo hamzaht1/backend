@@ -10,6 +10,41 @@ const PointRestockHistory = require('../models/PointRestockHistory');
 // Ajout du modèle LivraisonEncours
 const LivraisonEncours = require('../models/Delivery');
 
+/**
+ * @swagger
+ * tags:
+ *   name: Dashboard
+ *   description: Dashboard analytics and statistics
+ */
+
+/**
+ * @swagger
+ * /api/dashboard/stats:
+ *   get:
+ *     summary: Get dashboard statistics
+ *     tags: [Dashboard]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dashboard statistics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalVehicles:
+ *                   type: number
+ *                 activeDeliveries:
+ *                   type: number
+ *                 totalDrivers:
+ *                   type: number
+ *                 parkingOccupancy:
+ *                   type: number
+ *       401:
+ *         description: Unauthorized
+ */
+
 // GET /api/dashboard/overview - Get current overview data
 router.get('/overview', async (req, res) => {
   try {
